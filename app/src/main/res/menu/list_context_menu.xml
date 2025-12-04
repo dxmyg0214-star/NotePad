@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/context_open"
-          android:title="@string/menu_open" />
-    <item android:id="@+id/context_copy"
-          android:title="@string/menu_copy" />
-    <item android:id="@+id/context_delete"
-          android:title="@string/menu_delete" />
+    <!-- 移除所有图标，仅保留文字，减少菜单高度 -->
+    <item
+        android:id="@+id/context_open"
+        android:title="@string/menu_open" />
+    <item
+        android:id="@+id/context_copy"
+        android:title="@string/menu_copy" />
+    <item
+        android:id="@+id/context_delete"
+        android:title="@string/menu_delete" />
 </menu>

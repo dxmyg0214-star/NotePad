@@ -21,3 +21,8 @@ android {
         }
     }
 }
+
+dependencies {
+    // 适配API11+的AppCompat库（版本和compileSdk一致）
+    implementation 'com.android.support:appcompat-v7:23.0.1'
+}

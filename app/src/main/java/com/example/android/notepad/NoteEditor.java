@@ -1,23 +1,5 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.android.notepad;
-
 import static com.example.android.notepad.R.*;
-
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -40,19 +22,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-/**
- * This Activity handles "editing" a note, where editing is responding to
- * {@link Intent#ACTION_VIEW} (request to view data), edit a note
- * {@link Intent#ACTION_EDIT}, create a note {@link Intent#ACTION_INSERT}, or
- * create a new note from the current contents of the clipboard {@link Intent#ACTION_PASTE}.
- *
- * NOTE: Notice that the provider operations in this Activity are taking place on the UI thread.
- * This is not a good practice. It is only done here to make the code more readable. A real
- * application should use the {@link android.content.AsyncQueryHandler}
- * or {@link android.os.AsyncTask} object to perform operations asynchronously on a separate thread.
- */
+
 public class NoteEditor extends Activity {
-    // For logging and debugging purposes
     private static final String TAG = "NoteEditor";
 
     /*
@@ -80,9 +51,7 @@ public class NoteEditor extends Activity {
     private EditText mText;
     private String mOriginalContent;
 
-    /**
-     * Defines a custom EditText View that draws lines between each line of text that is displayed.
-     */
+
     public static class LinedEditText extends EditText {
         private Rect mRect;
         private Paint mPaint;
@@ -98,10 +67,7 @@ public class NoteEditor extends Activity {
             mPaint.setColor(0x800000FF);
         }
 
-        /**
-         * This is called to draw the LinedEditText object
-         * @param canvas The canvas on which the background is drawn.
-         */
+
         @Override
         protected void onDraw(Canvas canvas) {
 
@@ -120,11 +86,7 @@ public class NoteEditor extends Activity {
                 // Gets the baseline coordinates for the current line of text
                 int baseline = getLineBounds(i, r);
 
-                /*
-                 * Draws a line in the background from the left of the rectangle to the right,
-                 * at a vertical position one dip below the baseline, using the "paint" object
-                 * for details.
-                 */
+
                 canvas.drawLine(r.left, baseline + 1, r.right, baseline + 1, paint);
             }
 
@@ -133,23 +95,13 @@ public class NoteEditor extends Activity {
         }
     }
 
-    /**
-     * This method is called by Android when the Activity is first started. From the incoming
-     * Intent, it determines what kind of editing is desired, and then does it.
-     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*
-         * Creates an Intent to use when the Activity object's result is sent back to the
-         * caller.
-         */
         final Intent intent = getIntent();
 
-        /*
-         *  Sets up for the edit, based on the action specified for the incoming Intent.
-         */
 
         // Gets the action that triggered the intent filter for this Activity
         final String action = intent.getAction();
@@ -170,11 +122,6 @@ public class NoteEditor extends Activity {
             mState = STATE_INSERT;
             mUri = getContentResolver().insert(intent.getData(), null);
 
-            /*
-             * If the attempt to insert the new note fails, shuts down this Activity. The
-             * originating Activity receives back RESULT_CANCELED if it requested a result.
-             * Logs that the insert failed.
-             */
             if (mUri == null) {
 
                 // Writes the log identifier, a message, and the URI that failed.
@@ -185,28 +132,17 @@ public class NoteEditor extends Activity {
                 return;
             }
 
-            // Since the new entry was created, this sets the result to be returned
-            // set the result to be returned.
             setResult(RESULT_OK, (new Intent()).setAction(mUri.toString()));
 
         // If the action was other than EDIT or INSERT:
         } else {
 
-            // Logs an error that the action was not understood, finishes the Activity, and
-            // returns RESULT_CANCELED to an originating Activity.
             Log.e(TAG, "Unknown action, exiting");
             finish();
             return;
         }
 
-        /*
-         * Using the URI passed in with the triggering Intent, gets the note or notes in
-         * the provider.
-         * Note: This is being done on the UI thread. It will block the thread until the query
-         * completes. In a sample app, going against a simple provider based on a local database,
-         * the block will be momentary, but in a real app you should use
-         * android.content.AsyncQueryHandler or android.os.AsyncTask.
-         */
+
         mCursor = managedQuery(
             mUri,         // The URI that gets multiple notes from the provider.
             PROJECTION,   // A projection that returns the note ID and note content for each note.
@@ -215,12 +151,11 @@ public class NoteEditor extends Activity {
             null          // Use the default sort order (modification date, descending)
         );
 
-        // For a paste, initializes the data from clipboard.
-        // (Must be done after mCursor is initialized.)
+
         if (Intent.ACTION_PASTE.equals(action)) {
-            // Does the paste
+
             performPaste();
-            // Switches the state to EDIT so the title can be modified.
+
             mState = STATE_EDIT;
         }
 
@@ -239,31 +174,15 @@ public class NoteEditor extends Activity {
         }
     }
 
-    /**
-     * This method is called when the Activity is about to come to the foreground. This happens
-     * when the Activity comes to the top of the task stack, OR when it is first starting.
-     *
-     * Moves to the first note in the list, sets an appropriate title for the action chosen by
-     * the user, puts the note contents into the TextView, and saves the original text as a
-     * backup.
-     */
+
     @Override
     protected void onResume() {
         super.onResume();
 
-        /*
-         * mCursor is initialized, since onCreate() always precedes onResume for any running
-         * process. This tests that it's not null, since it should always contain data.
-         */
         if (mCursor != null) {
             // Requery in case something changed while paused (such as the title)
             mCursor.requery();
 
-            /* Moves to the first record. Always call moveToFirst() before accessing data in
-             * a Cursor for the first time. The semantics of using a Cursor are that when it is
-             * created, its internal index is pointing to a "place" immediately before the first
-             * record.
-             */
             mCursor.moveToFirst();
 
             // Modifies the window title for the Activity according to the current Activity state.
@@ -279,12 +198,7 @@ public class NoteEditor extends Activity {
                 setTitle(getText(R.string.title_create));
             }
 
-            /*
-             * onResume() may have been called after the Activity lost focus (was paused).
-             * The user was either editing or creating a note when the Activity paused.
-             * The Activity should re-display the text that had been retrieved previously, but
-             * it should not move the cursor. This helps the user to continue editing or entering.
-             */
+
 
             // Gets the note text from the Cursor and puts it in the TextView, but doesn't change
             // the text cursor's position.
@@ -307,14 +221,6 @@ public class NoteEditor extends Activity {
         }
     }
 
-    /**
-     * This method is called when an Activity loses focus during its normal operation, and is then
-     * later on killed. The Activity has a chance to save its state so that the system can restore
-     * it.
-     *
-     * Notice that this method isn't a normal part of the Activity lifecycle. It won't be called
-     * if the user simply navigates away from the Activity.
-     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         // Save away the original text, so we still have it if the activity
@@ -322,50 +228,21 @@ public class NoteEditor extends Activity {
         outState.putString(ORIGINAL_CONTENT, mOriginalContent);
     }
 
-    /**
-     * This method is called when the Activity loses focus.
-     *
-     * For Activity objects that edit information, onPause() may be the one place where changes are
-     * saved. The Android application model is predicated on the idea that "save" and "exit" aren't
-     * required actions. When users navigate away from an Activity, they shouldn't have to go back
-     * to it to complete their work. The act of going away should save everything and leave the
-     * Activity in a state where Android can destroy it if necessary.
-     *
-     * If the user hasn't done anything, then this deletes or clears out the note, otherwise it
-     * writes the user's work to the provider.
-     */
+
     @Override
     protected void onPause() {
         super.onPause();
 
-        /*
-         * Tests to see that the query operation didn't fail (see onCreate()). The Cursor object
-         * will exist, even if no records were returned, unless the query failed because of some
-         * exception or error.
-         *
-         */
         if (mCursor != null) {
 
             // Get the current note text.
             String text = mText.getText().toString();
             int length = text.length();
 
-            /*
-             * If the Activity is in the midst of finishing and there is no text in the current
-             * note, returns a result of CANCELED to the caller, and deletes the note. This is done
-             * even if the note was being edited, the assumption being that the user wanted to
-             * "clear out" (delete) the note.
-             */
             if (isFinishing() && (length == 0)) {
                 setResult(RESULT_CANCELED);
                 deleteNote();
 
-                /*
-                 * Writes the edits to the provider. The note has been edited if an existing note was
-                 * retrieved into the editor *or* if a new note was inserted. In the latter case,
-                 * onCreate() inserted a new empty note into the provider, and it is this new note
-                 * that is being edited.
-                 */
             } else if (mState == STATE_EDIT) {
                 // Creates a map to contain the new values for the columns
                 updateNote(text, null);
@@ -376,16 +253,6 @@ public class NoteEditor extends Activity {
         }
     }
 
-    /**
-     * This method is called when the user clicks the device's Menu button the first time for
-     * this Activity. Android passes in a Menu object that is populated with items.
-     *
-     * Builds the menus for editing and inserting, and adds in alternative actions that
-     * registered themselves to handle the MIME types for this application.
-     *
-     * @param menu A Menu object to which items should be added.
-     * @return True to display the menu.
-     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate menu from XML resource
@@ -394,11 +261,7 @@ public class NoteEditor extends Activity {
 
         // Only add extra menu items for a saved note 
         if (mState == STATE_EDIT) {
-            // Append to the
-            // menu items for any other activities that can do stuff with it
-            // as well.  This does a query on the system for any activities that
-            // implement the ALTERNATIVE_ACTION for our data, adding a menu item
-            // for each one that is found.
+
             Intent intent = new Intent(null, mUri);
             intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
             menu.addIntentOptions(Menu.CATEGORY_ALTERNATIVE, 0, 0,
@@ -422,15 +285,6 @@ public class NoteEditor extends Activity {
         return super.onPrepareOptionsMenu(menu);
     }
 
-    /**
-     * This method is called when a menu item is selected. Android passes in the selected item.
-     * The switch statement in this method calls the appropriate method to perform the action the
-     * user chose.
-     *
-     * @param item The selected MenuItem
-     * @return True to indicate that the item was processed, and no further work is necessary. False
-     * to proceed to further processing as indicated in the MenuItem object.
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle all of the possible menu actions.
@@ -449,9 +303,7 @@ public class NoteEditor extends Activity {
     }
 
 //BEGIN_INCLUDE(paste)
-    /**
-     * A helper method that replaces the note's data with the contents of the clipboard.
-     */
+
     private final void performPaste() {
 
         // Gets a handle to the Clipboard Manager
@@ -488,8 +340,7 @@ public class NoteEditor extends Activity {
                         null            // Use the default sort order
                 );
 
-                // If the Cursor is not null, and it contains at least one record
-                // (moveToFirst() returns true), then this gets the note data from it.
+
                 if (orig != null) {
                     if (orig.moveToFirst()) {
                         int colNoteIndex = mCursor.getColumnIndex(NotePad.Notes.COLUMN_NAME_NOTE);
@@ -503,8 +354,6 @@ public class NoteEditor extends Activity {
                 }
             }
 
-            // If the contents of the clipboard wasn't a reference to a note, then
-            // this converts whatever it is to text.
             if (text == null) {
                 text = item.coerceToText(this).toString();
             }
@@ -515,11 +364,6 @@ public class NoteEditor extends Activity {
     }
 //END_INCLUDE(paste)
 
-    /**
-     * Replaces the current note contents with the text and title provided as arguments.
-     * @param text The new note contents to use.
-     * @param title The new note title to use
-     */
     private final void updateNote(String text, String title) {
 
         // Sets up a map to contain values to be updated in the provider.
@@ -558,17 +402,6 @@ public class NoteEditor extends Activity {
         // This puts the desired notes text into the map.
         values.put(NotePad.Notes.COLUMN_NAME_NOTE, text);
 
-        /*
-         * Updates the provider with the new values in the map. The ListView is updated
-         * automatically. The provider sets this up by setting the notification URI for
-         * query Cursor objects to the incoming URI. The content resolver is thus
-         * automatically notified when the Cursor for the URI changes, and the UI is
-         * updated.
-         * Note: This is being done on the UI thread. It will block the thread until the
-         * update completes. In a sample app, going against a simple provider based on a
-         * local database, the block will be momentary, but in a real app you should use
-         * android.content.AsyncQueryHandler or android.os.AsyncTask.
-         */
         getContentResolver().update(
                 mUri,    // The URI for the record to update.
                 values,  // The map of column names and new values to apply to them.
@@ -579,10 +412,6 @@ public class NoteEditor extends Activity {
 
     }
 
-    /**
-     * This helper method cancels the work done on a note.  It deletes the note if it was
-     * newly created, or reverts to the original text of the note i
-     */
     private final void cancelNote() {
         if (mCursor != null) {
             if (mState == STATE_EDIT) {
@@ -601,9 +430,6 @@ public class NoteEditor extends Activity {
         finish();
     }
 
-    /**
-     * Take care of deleting a note.  Simply deletes the entry.
-     */
     private final void deleteNote() {
         if (mCursor != null) {
             mCursor.close();
