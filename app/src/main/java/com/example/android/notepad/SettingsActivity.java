@@ -23,8 +23,6 @@ public class SettingsActivity extends Activity {
     private static final String KEY_BG_COLOR = "bg_color";
     private static final String KEY_FONT_SIZE = "font_size";
     private static final String KEY_SHOW_TIMESTAMP = "show_timestamp";
-
-
     private static final int DEFAULT_BG_COLOR = Color.WHITE;
     private static final int DEFAULT_FONT_SIZE = 16;
     private static final boolean DEFAULT_SHOW_TIMESTAMP = true;
@@ -91,7 +89,6 @@ public class SettingsActivity extends Activity {
             setResult(RESULT_OK, new Intent().putExtra("refresh", true));
         });
     }
-
     // 加载当前设置
     private void loadCurrentSettings() {
         // 背景色
@@ -105,7 +102,6 @@ public class SettingsActivity extends Activity {
         boolean showTimestamp = sp.getBoolean(KEY_SHOW_TIMESTAMP, DEFAULT_SHOW_TIMESTAMP);
         switchShowTimestamp.setChecked(showTimestamp);
     }
-
     // 显示颜色选择弹窗
     private void showColorPickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

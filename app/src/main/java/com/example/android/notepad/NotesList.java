@@ -65,8 +65,6 @@ public class NotesList extends ListActivity {
     private static final int DEFAULT_FONT_SIZE = 16;
     private static final boolean DEFAULT_SHOW_TIMESTAMP = true;
     private SharedPreferences sp;
-
-
     // 新增：时间戳格式化
     private SimpleCursorAdapter.ViewBinder mTimeStampBinder = new SimpleCursorAdapter.ViewBinder() {
         @Override
@@ -102,8 +100,6 @@ public class NotesList extends ListActivity {
             return false;
         }
     };
-
-
     /**
      * onCreate is called when Android starts this Activity from scratch.
      */
@@ -197,7 +193,6 @@ public class NotesList extends ListActivity {
                     "%" + mSearchQuery + "%"
             };
         }
-
         // 查询数据
         Cursor cursor = managedQuery(
                 getIntent().getData(),
@@ -224,7 +219,6 @@ public class NotesList extends ListActivity {
         );
         // 给所有适配器设置时间戳格式化Binder
         adapter.setViewBinder(mTimeStampBinder);
-
         setListAdapter(adapter);
     }
 
